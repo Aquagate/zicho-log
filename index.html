@@ -31,46 +31,21 @@
             <textarea id="complaint-text" name="complaint-text" rows="3" required placeholder="1〜3行でOK"></textarea>
           </div>
           <div class="form-row">
-            <label for="fact-text">事実 or 小さな肯定（任意だけど書くと良い）</label>
-            <input type="text" id="fact-text" name="fact-text" placeholder="例: 5分散歩できた" />
+            <label for="weight-score">おもみ (かるい〜おもい / 1-100)</label>
+            <input type="range" id="weight-score" name="weight-score" min="1" max="100" step="1" />
+            <div class="range-value" id="weight-score-value">1</div>
           </div>
-          <div class="form-grid">
-            <div>
-              <label for="pain-low">腰痛 (0-10)</label>
-              <input type="range" id="pain-low" name="pain-low" min="0" max="10" step="1" />
-              <div class="range-value" id="pain-low-value">0</div>
+          <div class="form-row">
+            <label>タグ（クリックで選択 / 複数OK）</label>
+            <div class="tag-options" id="tag-options">
+              <button type="button" class="tag-button" data-tag="腰">腰</button>
+              <button type="button" class="tag-button" data-tag="股関節">股関節</button>
+              <button type="button" class="tag-button" data-tag="胸">胸</button>
+              <button type="button" class="tag-button" data-tag="足首">足首</button>
+              <button type="button" class="tag-button" data-tag="メンタル">メンタル</button>
+              <button type="button" class="tag-button" data-tag="その他">その他</button>
             </div>
-            <div>
-              <label for="pain-hip">股関節痛 (0-10)</label>
-              <input type="range" id="pain-hip" name="pain-hip" min="0" max="10" step="1" />
-              <div class="range-value" id="pain-hip-value">0</div>
-            </div>
-            <div>
-              <label for="sleep-hours">睡眠時間 (h)</label>
-              <input type="number" id="sleep-hours" name="sleep-hours" min="0" max="24" step="0.5" placeholder="例: 6.5" />
-            </div>
-            <div>
-              <label for="sleep-quality">睡眠質</label>
-              <select id="sleep-quality" name="sleep-quality">
-                <option value="">選択なし</option>
-                <option value="good">good</option>
-                <option value="ok">ok</option>
-                <option value="bad">bad</option>
-              </select>
-            </div>
-            <div>
-              <label for="mental-state">メンタル</label>
-              <select id="mental-state" name="mental-state">
-                <option value="">選択なし</option>
-                <option value="good">good</option>
-                <option value="ok">ok</option>
-                <option value="bad">bad</option>
-              </select>
-            </div>
-            <div>
-              <label for="activity-hint">活動メモ（任意）</label>
-              <input type="text" id="activity-hint" name="activity-hint" placeholder="例: 在宅作業" />
-            </div>
+            <span class="form-hint">タグなしでも保存できます。</span>
           </div>
           <div class="form-actions">
             <button type="submit" class="primary">保存</button>
@@ -90,8 +65,6 @@
             <label>To <input type="date" id="filter-to" /></label>
           </div>
           <div class="filter-row">
-            <label>腰痛 >= <input type="number" id="filter-low" min="0" max="10" step="1" /></label>
-            <label>股関節痛 >= <input type="number" id="filter-hip" min="0" max="10" step="1" /></label>
             <button type="button" id="apply-filter">フィルタ適用</button>
           </div>
         </div>
@@ -111,43 +84,18 @@
             <textarea id="edit-complaint" rows="3" required></textarea>
           </div>
           <div class="form-row">
-            <label for="edit-fact">事実 or 小さな肯定</label>
-            <input type="text" id="edit-fact" />
+            <label for="edit-weight-score">おもみ (1-100)</label>
+            <input type="number" id="edit-weight-score" min="1" max="100" step="1" />
           </div>
-          <div class="form-grid">
-            <div>
-              <label for="edit-pain-low">腰痛 (0-10)</label>
-              <input type="number" id="edit-pain-low" min="0" max="10" step="1" />
-            </div>
-            <div>
-              <label for="edit-pain-hip">股関節痛 (0-10)</label>
-              <input type="number" id="edit-pain-hip" min="0" max="10" step="1" />
-            </div>
-            <div>
-              <label for="edit-sleep-hours">睡眠時間</label>
-              <input type="number" id="edit-sleep-hours" min="0" max="24" step="0.5" />
-            </div>
-            <div>
-              <label for="edit-sleep-quality">睡眠質</label>
-              <select id="edit-sleep-quality">
-                <option value="">選択なし</option>
-                <option value="good">good</option>
-                <option value="ok">ok</option>
-                <option value="bad">bad</option>
-              </select>
-            </div>
-            <div>
-              <label for="edit-mental">メンタル</label>
-              <select id="edit-mental">
-                <option value="">選択なし</option>
-                <option value="good">good</option>
-                <option value="ok">ok</option>
-                <option value="bad">bad</option>
-              </select>
-            </div>
-            <div>
-              <label for="edit-activity">活動メモ</label>
-              <input type="text" id="edit-activity" />
+          <div class="form-row">
+            <label>タグ</label>
+            <div class="tag-options" id="edit-tag-options">
+              <button type="button" class="tag-button" data-tag="腰">腰</button>
+              <button type="button" class="tag-button" data-tag="股関節">股関節</button>
+              <button type="button" class="tag-button" data-tag="胸">胸</button>
+              <button type="button" class="tag-button" data-tag="足首">足首</button>
+              <button type="button" class="tag-button" data-tag="メンタル">メンタル</button>
+              <button type="button" class="tag-button" data-tag="その他">その他</button>
             </div>
           </div>
           <div class="form-actions">

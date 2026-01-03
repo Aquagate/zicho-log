@@ -36,32 +36,20 @@ const toast = document.getElementById("toast");
 const logForm = document.getElementById("log-form");
 const entryDateInput = document.getElementById("entry-date");
 const complaintInput = document.getElementById("complaint-text");
-const factInput = document.getElementById("fact-text");
-const painLowInput = document.getElementById("pain-low");
-const painHipInput = document.getElementById("pain-hip");
-const sleepHoursInput = document.getElementById("sleep-hours");
-const sleepQualityInput = document.getElementById("sleep-quality");
-const mentalStateInput = document.getElementById("mental-state");
-const activityHintInput = document.getElementById("activity-hint");
+const weightScoreInput = document.getElementById("weight-score");
+const tagOptions = document.getElementById("tag-options");
 
 const logList = document.getElementById("log-list");
 const filterFromInput = document.getElementById("filter-from");
 const filterToInput = document.getElementById("filter-to");
-const filterLowInput = document.getElementById("filter-low");
-const filterHipInput = document.getElementById("filter-hip");
 const applyFilterButton = document.getElementById("apply-filter");
 
 const editForm = document.getElementById("edit-form");
 const editIdInput = document.getElementById("edit-id");
 const editDateInput = document.getElementById("edit-date");
 const editComplaintInput = document.getElementById("edit-complaint");
-const editFactInput = document.getElementById("edit-fact");
-const editPainLowInput = document.getElementById("edit-pain-low");
-const editPainHipInput = document.getElementById("edit-pain-hip");
-const editSleepHoursInput = document.getElementById("edit-sleep-hours");
-const editSleepQualityInput = document.getElementById("edit-sleep-quality");
-const editMentalInput = document.getElementById("edit-mental");
-const editActivityInput = document.getElementById("edit-activity");
+const editWeightScoreInput = document.getElementById("edit-weight-score");
+const editTagOptions = document.getElementById("edit-tag-options");
 const deleteLogButton = document.getElementById("delete-log");
 const backToListButton = document.getElementById("back-to-list");
 
@@ -84,12 +72,12 @@ const exportFromInput = document.getElementById("export-from");
 const exportToInput = document.getElementById("export-to");
 const exportJsonButton = document.getElementById("export-json");
 
-const painLowValue = document.getElementById("pain-low-value");
-const painHipValue = document.getElementById("pain-hip-value");
+const weightScoreValue = document.getElementById("weight-score-value");
 
 function initDateInputs() {
   const today = new Date().toISOString().slice(0, 10);
   entryDateInput.value = today;
+  weightScoreInput.value = "1";
   filterToInput.value = today;
   llmToInput.value = today;
   outputToInput.value = today;
@@ -182,18 +170,6 @@ function filterEntries(entries, filters) {
     if (!withinRange(entry.entryDate, filters.from, filters.to)) {
       return false;
     }
-    if (filters.low !== null && entry.painLowBack !== null && entry.painLowBack < filters.low) {
-      return false;
-    }
-    if (filters.hip !== null && entry.painHip !== null && entry.painHip < filters.hip) {
-      return false;
-    }
-    if (filters.low !== null && entry.painLowBack === null) {
-      return false;
-    }
-    if (filters.hip !== null && entry.painHip === null) {
-      return false;
-    }
     return true;
   });
 }
@@ -208,8 +184,6 @@ function renderList() {
   const filters = {
     from: filterFromInput.value || null,
     to: filterToInput.value || null,
-    low: toNullableNumber(filterLowInput.value),
-    hip: toNullableNumber(filterHipInput.value),
   };
   const filtered = filterEntries(entries, filters);
   logList.innerHTML = "";
@@ -220,10 +194,11 @@ function renderList() {
   filtered.forEach((entry) => {
     const item = document.createElement("div");
     item.className = "list-item";
+    const tags = entry.tags && entry.tags.length ? entry.tags.join(", ") : "-";
     item.innerHTML = `
       <header>
         <strong>${entry.entryDate}</strong>
-        <span>腰:${entry.painLowBack ?? "-"} / 股:${entry.painHip ?? "-"} / メンタル:${entry.mentalState ?? "-"}</span>
+        <span>おもみ:${entry.weightScore ?? "-"} / タグ:${tags}</span>
       </header>
       <div>${formatShortText(entry.complaintText)}</div>
       <div class="form-actions">
@@ -238,18 +213,23 @@ function populateEdit(entry) {
   editIdInput.value = entry.id;
   editDateInput.value = entry.entryDate;
   editComplaintInput.value = entry.complaintText;
-  editFactInput.value = entry.factOrWinText ?? "";
-  editPainLowInput.value = entry.painLowBack ?? "";
-  editPainHipInput.value = entry.painHip ?? "";
-  editSleepHoursInput.value = entry.sleepHours ?? "";
-  editSleepQualityInput.value = entry.sleepQuality ?? "";
-  editMentalInput.value = entry.mentalState ?? "";
-  editActivityInput.value = entry.activityHint ?? "";
+  editWeightScoreInput.value = entry.weightScore ?? "";
+  setSelectedTags(editTagOptions, entry.tags);
 }
 
 function updateRangeValue() {
-  painLowValue.textContent = painLowInput.value;
-  painHipValue.textContent = painHipInput.value;
+  weightScoreValue.textContent = weightScoreInput.value;
+}
+
+function getSelectedTags(container) {
+  return Array.from(container.querySelectorAll(".tag-button.is-active")).map((button) => button.dataset.tag);
+}
+
+function setSelectedTags(container, tags) {
+  const active = new Set(tags || []);
+  container.querySelectorAll(".tag-button").forEach((button) => {
+    button.classList.toggle("is-active", active.has(button.dataset.tag));
+  });
 }
 
 function getLogsForRange(from, to) {
@@ -266,23 +246,11 @@ function buildLogsText(entries) {
   return entries
     .map((entry) => {
       const parts = [];
-      if (entry.painLowBack !== null) {
-        parts.push(`腰${entry.painLowBack}`);
+      if (entry.weightScore !== null) {
+        parts.push(`おもみ${entry.weightScore}`);
       }
-      if (entry.painHip !== null) {
-        parts.push(`股${entry.painHip}`);
-      }
-      if (entry.sleepHours !== null) {
-        parts.push(`睡眠${entry.sleepHours}h`);
-      }
-      if (entry.sleepQuality) {
-        parts.push(`睡眠質${entry.sleepQuality}`);
-      }
-      if (entry.mentalState) {
-        parts.push(`メンタル${entry.mentalState}`);
-      }
-      if (entry.factOrWinText) {
-        parts.push(`事実:${entry.factOrWinText}`);
+      if (entry.tags && entry.tags.length) {
+        parts.push(`タグ:${entry.tags.join(", ")}`);
       }
       const detail = parts.length ? ` (${parts.join(" / ")})` : "";
       return `- ${entry.entryDate}: ${entry.complaintText}${detail}`;
@@ -375,8 +343,18 @@ navButtons.forEach((button) => {
   });
 });
 
-painLowInput.addEventListener("input", updateRangeValue);
-painHipInput.addEventListener("input", updateRangeValue);
+function handleTagClick(container, event) {
+  const button = event.target.closest(".tag-button");
+  if (!button) {
+    return;
+  }
+  button.classList.toggle("is-active");
+}
+
+tagOptions.addEventListener("click", (event) => handleTagClick(tagOptions, event));
+editTagOptions.addEventListener("click", (event) => handleTagClick(editTagOptions, event));
+
+weightScoreInput.addEventListener("input", updateRangeValue);
 
 logForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -387,22 +365,16 @@ logForm.addEventListener("submit", (event) => {
     createdAt: now,
     entryDate: entryDateInput.value,
     complaintText: complaintInput.value.trim(),
-    factOrWinText: toNullableString(factInput.value),
-    painLowBack: toNullableNumber(painLowInput.value),
-    painHip: toNullableNumber(painHipInput.value),
-    sleepHours: toNullableNumber(sleepHoursInput.value),
-    sleepQuality: sleepQualityInput.value || null,
-    mentalState: mentalStateInput.value || null,
-    activityHint: toNullableString(activityHintInput.value),
-    tags: [],
+    weightScore: toNullableNumber(weightScoreInput.value),
+    tags: getSelectedTags(tagOptions),
     llmSummaryIds: [],
   };
   entries.push(entry);
   saveData(STORAGE_KEYS.entries, entries);
   logForm.reset();
   entryDateInput.value = new Date().toISOString().slice(0, 10);
-  painLowInput.value = "0";
-  painHipInput.value = "0";
+  weightScoreInput.value = "1";
+  setSelectedTags(tagOptions, []);
   updateRangeValue();
   renderList();
   showToast("保存しました");
@@ -444,13 +416,8 @@ editForm.addEventListener("submit", (event) => {
     ...entries[index],
     entryDate: editDateInput.value,
     complaintText: editComplaintInput.value.trim(),
-    factOrWinText: toNullableString(editFactInput.value),
-    painLowBack: toNullableNumber(editPainLowInput.value),
-    painHip: toNullableNumber(editPainHipInput.value),
-    sleepHours: toNullableNumber(editSleepHoursInput.value),
-    sleepQuality: editSleepQualityInput.value || null,
-    mentalState: editMentalInput.value || null,
-    activityHint: toNullableString(editActivityInput.value),
+    weightScore: toNullableNumber(editWeightScoreInput.value),
+    tags: getSelectedTags(editTagOptions),
   };
   saveData(STORAGE_KEYS.entries, entries);
   renderList();
