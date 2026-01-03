@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>zicho-log v0.1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>体調グチログ v0.1</h1>
+      <nav class="app-nav">
+        <button type="button" class="nav-button" data-target="home">入力</button>
+        <button type="button" class="nav-button" data-target="list">一覧</button>
+        <button type="button" class="nav-button" data-target="llm">LLM素材</button>
+        <button type="button" class="nav-button" data-target="llm-output">LLM返答</button>
+        <button type="button" class="nav-button" data-target="export">エクスポート</button>
+      </nav>
+    </header>
+
+    <main class="app-main">
+      <section id="home" class="app-section is-active">
+        <h2>ログ入力</h2>
+        <form id="log-form" class="card">
+          <div class="form-row">
+            <label for="entry-date">日付</label>
+            <input type="date" id="entry-date" name="entry-date" required />
+          </div>
+          <div class="form-row">
+            <label for="complaint-text">今日の愚痴・自嘲（必須）</label>
+            <textarea id="complaint-text" name="complaint-text" rows="3" required placeholder="1〜3行でOK"></textarea>
+          </div>
+          <div class="form-row">
+            <label for="weight-score">おもみ (かるい〜おもい / 1-100)</label>
+            <input type="range" id="weight-score" name="weight-score" min="1" max="100" step="1" />
+            <div class="range-value" id="weight-score-value">1</div>
+          </div>
+          <div class="form-row">
+            <label>タグ（クリックで選択 / 複数OK）</label>
+            <div class="tag-options" id="tag-options">
+              <button type="button" class="tag-button" data-tag="腰">腰</button>
+              <button type="button" class="tag-button" data-tag="股関節">股関節</button>
+              <button type="button" class="tag-button" data-tag="胸">胸</button>
+              <button type="button" class="tag-button" data-tag="足首">足首</button>
+              <button type="button" class="tag-button" data-tag="メンタル">メンタル</button>
+              <button type="button" class="tag-button" data-tag="その他">その他</button>
+            </div>
+            <span class="form-hint">タグなしでも保存できます。</span>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="primary">保存</button>
+            <span class="form-hint">最短で保存できます。数値は後から編集OK。</span>
+          </div>
+        </form>
+      </section>
+
+      <section id="list" class="app-section">
+        <h2>ログ一覧</h2>
+        <div class="card">
+          <div class="filter-row">
+            <span>期間</span>
+            <button type="button" class="quick-range" data-range="7">直近7日</button>
+            <button type="button" class="quick-range" data-range="30">直近30日</button>
+            <label>From <input type="date" id="filter-from" /></label>
+            <label>To <input type="date" id="filter-to" /></label>
+          </div>
+          <div class="filter-row">
+            <button type="button" id="apply-filter">フィルタ適用</button>
+          </div>
+        </div>
+        <div id="log-list" class="list"></div>
+      </section>
+
+      <section id="detail" class="app-section">
+        <h2>ログ詳細 / 編集</h2>
+        <form id="edit-form" class="card">
+          <input type="hidden" id="edit-id" />
+          <div class="form-row">
+            <label for="edit-date">日付</label>
+            <input type="date" id="edit-date" required />
+          </div>
+          <div class="form-row">
+            <label for="edit-complaint">愚痴・自嘲</label>
+            <textarea id="edit-complaint" rows="3" required></textarea>
+          </div>
+          <div class="form-row">
+            <label for="edit-weight-score">おもみ (1-100)</label>
+            <input type="number" id="edit-weight-score" min="1" max="100" step="1" />
+          </div>
+          <div class="form-row">
+            <label>タグ</label>
+            <div class="tag-options" id="edit-tag-options">
+              <button type="button" class="tag-button" data-tag="腰">腰</button>
+              <button type="button" class="tag-button" data-tag="股関節">股関節</button>
+              <button type="button" class="tag-button" data-tag="胸">胸</button>
+              <button type="button" class="tag-button" data-tag="足首">足首</button>
+              <button type="button" class="tag-button" data-tag="メンタル">メンタル</button>
+              <button type="button" class="tag-button" data-tag="その他">その他</button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="primary">更新</button>
+            <button type="button" id="delete-log" class="danger">削除</button>
+            <button type="button" id="back-to-list">一覧へ戻る</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="llm" class="app-section">
+        <h2>LLMコピペ素材生成</h2>
+        <div class="card">
+          <div class="filter-row">
+            <span>対象期間</span>
+            <button type="button" class="quick-llm" data-range="7">直近7日</button>
+            <button type="button" class="quick-llm" data-range="30">直近30日</button>
+            <label>From <input type="date" id="llm-from" /></label>
+            <label>To <input type="date" id="llm-to" /></label>
+            <button type="button" id="generate-llm">生成</button>
+          </div>
+          <div class="form-row">
+            <label for="llm-output-text">生成結果</label>
+            <textarea id="llm-output-text" rows="14" readonly></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="copy-llm" class="primary">コピー</button>
+            <span id="copy-status" class="form-hint"></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="llm-output" class="app-section">
+        <h2>LLM返答取り込み</h2>
+        <div class="card">
+          <div class="filter-row">
+            <span>対象期間</span>
+            <button type="button" class="quick-llm-output" data-range="7">直近7日</button>
+            <button type="button" class="quick-llm-output" data-range="30">直近30日</button>
+            <label>From <input type="date" id="output-from" /></label>
+            <label>To <input type="date" id="output-to" /></label>
+          </div>
+          <div class="form-row">
+            <label for="model-info">モデル情報（任意）</label>
+            <input type="text" id="model-info" placeholder="例: GPT-4o" />
+          </div>
+          <div class="form-row">
+            <label for="raw-output">LLM返答（貼り付け）</label>
+            <textarea id="raw-output" rows="10" placeholder="1) ... 〜 6) ... を貼り付け"></textarea>
+            <span class="form-hint">番号は 1.〜6. で順番通りに含めてください（1) でもOK）。</span>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="save-llm-output" class="primary">保存</button>
+            <span id="parse-status" class="form-hint"></span>
+          </div>
+        </div>
+        <div id="llm-output-list" class="list"></div>
+      </section>
+
+      <section id="export" class="app-section">
+        <h2>設定 / エクスポート</h2>
+        <div class="card">
+          <p>全ログとLLMOutputを単一JSONとしてダウンロードできます。</p>
+          <div class="filter-row">
+            <span>期間指定 (任意)</span>
+            <label>From <input type="date" id="export-from" /></label>
+            <label>To <input type="date" id="export-to" /></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="export-json" class="primary">JSONダウンロード</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
