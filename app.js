@@ -3,17 +3,13 @@ const STORAGE_KEYS = {
   outputs: "zichoLlmOutputs",
 };
 
-const PROMPT_TEMPLATE = `---
-あなたは体調ログを「観察メモ」に変換する補助者です。
+const PROMPT_TEMPLATE = `あなたは体調ログを「観察メモ」に変換する補助者です。
 制約:
 - 医療的診断や断定はしない
 - 危険な運動指示はしない
 - 10〜15分以内で終わる低負荷の提案だけ
 - 出力は次のフォーマット(1〜6)を守る
-
-ユーザー状態:
-- 体力: 3/10
-- 腰と股関節に痛みあり
+- 1)〜6)の番号と見出しを必ず含める（番号の抜け/順序違いは不可）
 
 対象期間: {FROM} 〜 {TO}
 
@@ -26,8 +22,7 @@ const PROMPT_TEMPLATE = `---
 3) 悪化しやすい条件（仮説、各1行）
 4) 要注意サイン（条件付きで、断定しない）
 5) 明日の一歩（1つだけ、10〜15分以内、具体的に）
-6) 自嘲の中立化（短文）
----`;
+6) 自嘲の中立化（短文）`;
 
 const navButtons = document.querySelectorAll(".nav-button");
 const sections = document.querySelectorAll(".app-section");
